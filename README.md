@@ -1,4 +1,4 @@
-VC Template — Codex Working Style Base
+VC Template — Codex Working System
 
 This folder contains a generic working style scaffold for agent-driven development:
 - `AGENTS.md` — execution flow and conventions
