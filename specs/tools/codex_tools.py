@@ -13,12 +13,74 @@ def run(cmd, input_text=None):
 
 
 def git_branch():
+    """Return the current git branch name.
+
+    Handles non-worktree clones, detached HEAD, and common CI envs.
+    Fallbacks (in order):
+    - `git rev-parse --abbrev-ref HEAD`
+    - `git branch --show-current`
+    - `git symbolic-ref --quiet --short HEAD`
+    - CI env vars (GITHUB_REF_NAME, GITHUB_HEAD_REF, CI_COMMIT_REF_NAME, BRANCH_NAME,
+      BUILDKITE_BRANCH, CIRCLE_BRANCH, GIT_BRANCH)
+    - Local branch pointing at HEAD (if unique)
+    - `detached-<shortsha>`
+    """
+
+    # 1) Standard branch lookup
     r = run(["git", "rev-parse", "--abbrev-ref", "HEAD"])
     b = (r.stdout or "").strip()
-    if not b or b == "HEAD":
-        print("[codex_tools] Unable to determine branch; run inside a git worktree.", file=sys.stderr)
-        sys.exit(2)
-    return b
+    if r.returncode == 0 and b and b != "HEAD":
+        return b
+
+    # 2) Modern Git helper
+    r = run(["git", "branch", "--show-current"])
+    b = (r.stdout or "").strip()
+    if r.returncode == 0 and b:
+        return b
+
+    # 3) Symbolic ref (quiet)
+    r = run(["git", "symbolic-ref", "--quiet", "--short", "HEAD"])
+    b = (r.stdout or "").strip()
+    if r.returncode == 0 and b:
+        return b
+
+    # 4) CI environment fallbacks
+    import os
+    for key in (
+        "GITHUB_REF_NAME",  # branch or tag name
+        "GITHUB_HEAD_REF",  # PR source branch
+        "CI_COMMIT_REF_NAME",  # GitLab
+        "BRANCH_NAME",  # Jenkins
+        "BUILDKITE_BRANCH",
+        "CIRCLE_BRANCH",
+        "GIT_BRANCH",
+    ):
+        val = os.environ.get(key, "").strip()
+        if val:
+            return val
+
+    # 5) Try to find a local branch that points at HEAD (unique)
+    r = run([
+        "git",
+        "for-each-ref",
+        "--format=%(refname:short)",
+        "--points-at",
+        "HEAD",
+        "refs/heads",
+    ])
+    candidates = [ln.strip() for ln in (r.stdout or "").splitlines() if ln.strip()]
+    if r.returncode == 0 and len(candidates) == 1:
+        return candidates[0]
+
+    # 6) As a last resort, create a deterministic name for detached state
+    r = run(["git", "rev-parse", "--short", "HEAD"])
+    short = (r.stdout or "").strip() or "unknown"
+    fallback = f"detached-{short}"
+    print(
+        f"[codex_tools] Branch not detected (detached or non-worktree). Using '{fallback}'.",
+        file=sys.stderr,
+    )
+    return fallback
 
 
 def spec_dir_for_branch(branch: str) -> Path:
@@ -32,7 +94,13 @@ PROMPT = textwrap.dedent(
 ).strip()
 
 
-def codex_exec(prompt: str, model: str, log_file: Path, output_path: Optional[Path] = None):
+def codex_exec(
+    prompt: str,
+    model: str,
+    log_file: Path,
+    output_path: Optional[Path] = None,
+    reasoning_effort: str = "medium",
+):
     flags = ["--skip-git-repo-check", "--yolo"]
     cmd = [
         "codex",
@@ -44,7 +112,7 @@ def codex_exec(prompt: str, model: str, log_file: Path, output_path: Optional[Pa
         "-c",
         "tools.web_search=true",
         "-c",
-        "reasoning_effort=high",
+        f"reasoning_effort={reasoning_effort}",
         prompt
     ]
     with open(log_file, "a") as out:
@@ -63,7 +131,7 @@ def git_commit(msg: str):
     run(["git", "commit", "-m", msg])
 
 
-def loop(iterations: int, model: str, output_path: Optional[Path]):
+def loop(iterations: int, model: str, output_path: Optional[Path], reasoning_effort: str = "medium"):
     branch = git_branch()
     spec = spec_dir_for_branch(branch)
     spec.mkdir(parents=True, exist_ok=True)
@@ -83,7 +151,7 @@ def loop(iterations: int, model: str, output_path: Optional[Path]):
             break
         with open(log_file, "a") as f:
             f.write(f"[codex_tools] iteration {i}/{iterations}\n")
-        rc = codex_exec(PROMPT, model, log_file, output_path)
+        rc = codex_exec(PROMPT, model, log_file, output_path, reasoning_effort)
         # if git_changes_pending():
         #     git_commit(f"chore(loop): iteration {i}/{iterations} updates (auto)")
     print(f"[codex_tools] log: {log_file}")
@@ -93,10 +161,15 @@ def loop(iterations: int, model: str, output_path: Optional[Path]):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--iterations", "-n", type=int, default=5)
-    ap.add_argument("--model", default="gpt-5")
+    ap.add_argument("--model", "-m", default="gpt-5")
+    ap.add_argument(
+        "--reasoning-effort", "-r",
+        default="high",
+        choices=["low", "medium", "high", "auto"],
+    )
     ap.add_argument("--output", "-o", type=Path, help="Write agent final output to file (default: specs/<branch>/logs/final-output-<timestamp>.json)")
     args = ap.parse_args()
-    loop(args.iterations, args.model, args.output)
+    loop(args.iterations, args.model, args.output, args.reasoning_effort)
 
 
 if __name__ == "__main__":
