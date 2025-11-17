@@ -1,0 +1,15 @@
+# SPEC_CONTEXT.md.template
+
+This template is filled by the helper script. Keep the placeholders as-is.
+
+## Paths recorded in `SPEC_CONTEXT.md`
+- **SPEC_DIR**: {{SPEC_DIR}}
+- **SPEC**: {{SPEC}}
+- **TECHNICAL_NOTES**: {{TECHNICAL_NOTES}}
+- **SPEC_PROGRESS**: {{SPEC_PROGRESS}}
+- **TODO**: {{TODO}}
+- **JOURNAL**: {{JOURNAL}}
+- **FOR_HUMAN**: {{FOR_HUMAN}}
+- **WAY_OF_WORKING**: {{WAY_OF_WORKING}}
+- **USER_GUIDE**: {{USER_GUIDE}}
+- **SCRIPTS_DIR**: {{SCRIPTS_DIR}}

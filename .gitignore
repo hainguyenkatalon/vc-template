@@ -5,3 +5,4 @@ node_modules/
 # Python
 __pycache__/
 specs/**/logs/
+SPEC_CONTEXT.md

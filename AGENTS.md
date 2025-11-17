@@ -1,79 +1,41 @@
-# AGENTS.md — Way of Working Steps
+# AGENTS.md — Shared Way of Working
 
-This file tells Codex how to locate the current spec and how to execute, step‑by‑step. Shared helper scripts live under `specs/tools/`.
+This guide stays repo-agnostic. Branch-specific expectations live in the active spec folder (`WAY_OF_WORKING.md`).
 
-## Steps (Codex flow)
-0) Stuck gate
-   - If `specs/<branch>/STUCK.md` exists, do not proceed with any edits. Inform the human that you are blocked and point them to `FOR_HUMAN.md` in the spec folder. Exit.
-   - Clearing a stuck: a human removes `STUCK.md` (or renames it) after addressing the blocking items.
-1) Detect branch
-   - Run: `git rev-parse --abbrev-ref HEAD`.
-2) Locate spec folder (Branch → Spec)
-   - The current branch name defines the spec path: `specs/<branch>/`.
-   - Examples: `feat/self-healing-llm` → `specs/feat/self-healing-llm/`; `fix/webui-timeouts` → `specs/fix/webui-timeouts/`.
-   - If missing, scaffold the folder with this structure:
-     - `SPEC.md` — requirements and acceptance. YOU ARE NOT SUPPOSED TO CHANGE THIS FILE.
-     - `TECHNICAL_NOTES.md` — implementation map: classes/modules, entry points, resources, config and validation tips
-     - `FOR_HUMAN.md` — running list of decisions/questions that need human input (agent must try all feasible workarounds before writing here)
-     - `SPEC_PROGRESS.md` — high‑level progress against the spec (what is done/remaining; no low‑level details)
-     - `JOURNAL.md` — dated entries (intent, guardrails, commands, outcomes, next)
-     - `TODO.md` — short actionable list; update before/after work (check off done and add new items)
-     - `WAY_OF_WORKING.md` — spec‑specific practices/conventions for this branch
-     - `scripts/` — spec‑specific helpers with a `README.md` for usage
-   - Common helpers live under `specs/tools/` with a `README.md`.
-   - Source of truth: `SPEC.md` and the codebase are canonical. Other docs (`SPEC_PROGRESS.md`, `TODO.md`, `TECHNICAL_NOTES.md`, `JOURNAL.md`) can lag; when you find contradictions, update those docs to match the spec and current code.
-3) Confirm environment & conventions
-   - Skim `specs/tools/README.md` for JDK/Maven and command patterns.
-   - Read this spec’s `WAY_OF_WORKING.md` and follow its per‑iteration extras (fast build, TI tests, validations).
-4) Understand scope and slice
-   - Ultimate source of truth: `SPEC.md` and the codebase. Use them to anchor decisions.
-   - First, compare `SPEC_PROGRESS.md` against `SPEC.md` and the codebase to identify gaps. If any doc is stale or misleading, update it immediately (and journal):
-     - `SPEC_PROGRESS.md` (high‑level status)
-     - `TODO.md` (next actionable slices)
-     - `TECHNICAL_NOTES.md` (entry points, classes, resources)
-     - `WAY_OF_WORKING.md` (iteration extras)
-     - `USER_GUIDE.md` (user‑facing usage/value/limits)
-     - `scripts/README.md` (script usage)
-     - `FOR_HUMAN.md` (open decisions)
-   - Then, read `SPEC.md` (requirements) and `TECHNICAL_NOTES.md` (where to change code). Create/update `TODO.md` with the next thin, reversible slice.
-   - Update `TODO.md` before starting and after finishing: check off done items and add new follow‑ups.
-   - Keep legacy flows stable unless the spec changes them.
-   - Human loop: If you hit a decision that requires human input, first attempt any safe, parallelizable tasks. If still blocked, append a concise entry to `FOR_HUMAN.md` and continue with other tasks. Only when nothing more can be done, create `STUCK.md` in the spec folder and stop work.
-5) Journal (pre)
-   - First of all, commit all changes in the codebase.
-   - Add an entry to `JOURNAL.md`: intent, guardrails, immediate plan. Communicate actions with brief preambles.
-6) Implement (canonical, fail‑fast)
-   - Make minimal, precise changes; avoid large surface edits.
-   - Honor design‑by‑contract: surface contract violations early (don’t mask errors).
-   - Avoid hacks/ad‑hoc fixes and unnecessary fallbacks; prefer canonical, systematic solutions.
-   - Use logging wisely to aid troubleshooting and trace flow (no secrets).
-   - Any new script or tool must include a `README.md` section describing usage and arguments.
-   - Do not reintroduce stub runner/server scripts (e.g., `run-fallback-stub.sh`, `stub-llm-server.js`, `test-stub-llm.sh`). Validate with integration flows only.
+## Spec files
+- `SPEC_CONTEXT.md` — canonical list of spec file paths. Generate it via `specs/SPEC_CONTEXT_GUIDE.md` when missing.
+- `SPEC.md` — requirements + acceptance (source of truth with code).
+- `TECHNICAL_NOTES.md` — entry points, modules, paths, validation tips.
+- `SPEC_PROGRESS.md` — high-level done vs remaining.
+- `TODO.md` — thin-slice checklist.
+- `JOURNAL.md` — dated intent / commands / outcomes / next.
+- `FOR_HUMAN.md` — blocking questions after exhausting safe workarounds.
+- `WAY_OF_WORKING.md` — spec-specific cadence (builds/tests/validations).
+- `USER_GUIDE.md` — user-facing value/usage/limits.
+- `scripts/` — helper scripts (each must include a README entry).
 
-Build scripts policy
-- The build scripts under `specs/tools/` are considered tested. If a build fails, do not blindly edit scripts.
-- First, understand the error (logs/stacktrace, environment, inputs, credentials). Prefer fixing inputs/env.
-- Only change build scripts with explicit human approval and after documenting rationale in `JOURNAL.md`.
+## Spec context file
+- `SPEC_CONTEXT.md` (gitignored) stores the exact relative paths for all spec documents. If it’s missing, read `specs/SPEC_CONTEXT_GUIDE.md` and run the helper script to regenerate it from the template.
 
+## Flow
+1. **Stuck gate** — if `$SPEC_DIR/STUCK.md` exists, stop and summarize the block in `FOR_HUMAN.md`.
+2. **Load context** — read `SPEC_CONTEXT.md` (regenerate via `specs/SPEC_CONTEXT_GUIDE.md` if missing) so you have the exact file paths.
+3. **Align docs** — compare each spec document with `SPEC.md` and the current code; update any stale information and log unanswered decisions in `FOR_HUMAN.md`.
+4. **Plan** — capture the next thin, reversible slice (with acceptance) in `TODO.md`, referencing `TECHNICAL_NOTES.md` for entry points.
+5. **Journal (pre)** — ensure the tree is clean; append intent/guardrails/plan to `JOURNAL.md`.
+6. **Implement** — keep edits minimal, precise, and scoped to the slice; update `TECHNICAL_NOTES.md`, helper scripts, or their READMEs whenever behavior changes.
+7. **Validate** — run fast checks first, then broader ones; prefer integration tests over stubs; collect evidence paths.
+8. **Journal (post)** — append commands/artifacts/outcomes/next steps to `JOURNAL.md`; refresh `TODO.md`, `SPEC_PROGRESS.md`, and, if new questions remain, `FOR_HUMAN.md`.
+9. **User doc** — update `USER_GUIDE.md` to reflect the current value, access path, and limits.
+10. **Commit & push** — keep commits focused on the completed slice.
 
-7) Validate (quick → fail‑fast → broad)
-   - Prefer quick, fail‑fast validation first (targeted/unit/integration). Defer full product builds until the end of a batch of changes.
-   - Capture evidence paths (logs, reports) for the journal.
-   - Always prefer integration tests over stub tests; stub tests guarantee nothing in complex systems and software. Use stubs only for local smoke checks and never as a replacement for integration validation.
-8) Journal (post)
-   - Record commands, artifacts/paths, outcomes, and next actions in `JOURNAL.md`.
-   - Update `TODO.md`: check off completed items and add follow‑ups for the next slice.
-   - No manual hygiene here; the loop script (`specs/tools/codex-exec-loop.sh`) will auto‑trigger AI sweeps if docs grow beyond limits.
-9) User‑facing documentation
-    - Update or add a short doc (for users/PM/QA) describing what function has been implemented, its value, how to access it, and known limitations (no internal design details).
-10) Commit.
+## Code conventions
+- Minimal, purpose-driven edits; avoid speculative churn.
+- Preserve legacy behavior unless `SPEC.md` explicitly demands change.
+- Do not log secrets or sensitive tokens.
+- Each helper inside `scripts/` must document usage in its README.
+- Prefer fail-fast behavior; do not add fallback logic unless the spec explicitly requires it.
 
-## Notes
-- When updating *.md files, consolidate their content while still retaining useful information.
-
-## Reference
-- Tooling/Commands: `specs/tools/README.md`
-- Branch technical map: `specs/<branch>/TECHNICAL_NOTES.md`
-- Human loop files: `specs/<branch>/FOR_HUMAN.md` (questions) and `specs/<branch>/STUCK.md` (hard stop flag)
-
- 
+## Commit conventions
+- Keep commits scoped to the completed slice.
+- Ensure logs or build artifacts remain gitignored before committing.
