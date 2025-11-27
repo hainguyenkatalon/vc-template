@@ -1,9 +1,9 @@
 # AGENTS.md — Shared Way of Working
 
-This guide stays repo-agnostic. Branch-specific expectations live in the active spec folder (`WAY_OF_WORKING.md`).
+This guide stays repo-agnostic; edit sparingly to keep it concise. Repo-specific conventions live in `REPO_WAY_OF_WORKING.md`. Branch-specific expectations live in the active spec folder (`WAY_OF_WORKING.md`).
 
 ## Spec files
-- `SPEC_CONTEXT.md` — canonical list of spec file paths. Generate it via `specs/SPEC_CONTEXT_GUIDE.md` when missing.
+- `SPEC_CONTEXT.md` — canonical list of spec file paths.
 - `SPEC.md` — requirements + acceptance (source of truth with code).
 - `TECHNICAL_NOTES.md` — entry points, modules, paths, validation tips.
 - `SPEC_PROGRESS.md` — high-level done vs remaining.
@@ -14,12 +14,9 @@ This guide stays repo-agnostic. Branch-specific expectations live in the active 
 - `USER_GUIDE.md` — user-facing value/usage/limits.
 - `scripts/` — helper scripts (each must include a README entry).
 
-## Spec context file
-- `SPEC_CONTEXT.md` (gitignored) stores the exact relative paths for all spec documents. If it’s missing, read `specs/SPEC_CONTEXT_GUIDE.md` and run the helper script to regenerate it from the template.
-
 ## Flow
 1. **Stuck gate** — if `$SPEC_DIR/STUCK.md` exists, stop and summarize the block in `FOR_HUMAN.md`.
-2. **Load context** — read `SPEC_CONTEXT.md` (regenerate via `specs/SPEC_CONTEXT_GUIDE.md` if missing) so you have the exact file paths.
+2. **Load context** — run `specs/tools/gen-spec-context.sh` to refresh `SPEC_CONTEXT.md`, then read it so you have the exact file paths.
 3. **Align docs** — compare each spec document with `SPEC.md` and the current code; update any stale information and log unanswered decisions in `FOR_HUMAN.md`.
 4. **Plan** — capture the next thin, reversible slice (with acceptance) in `TODO.md`, referencing `TECHNICAL_NOTES.md` for entry points.
 5. **Journal (pre)** — ensure the tree is clean; append intent/guardrails/plan to `JOURNAL.md`.
@@ -32,7 +29,6 @@ This guide stays repo-agnostic. Branch-specific expectations live in the active 
 ## Code conventions
 - Minimal, purpose-driven edits; avoid speculative churn.
 - Preserve legacy behavior unless `SPEC.md` explicitly demands change.
-- Do not log secrets or sensitive tokens.
 - Each helper inside `scripts/` must document usage in its README.
 - Prefer fail-fast behavior; do not add fallback logic unless the spec explicitly requires it.
 
