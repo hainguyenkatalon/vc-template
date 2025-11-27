@@ -1,9 +1,8 @@
 # AGENTS.md — Shared Way of Working
 
-This guide stays repo-agnostic; edit sparingly to keep it concise. Repo-specific conventions live in `REPO_WAY_OF_WORKING.md`. Branch-specific expectations live in the active spec folder (`WAY_OF_WORKING.md`).
+This guide stays repo-agnostic; humans own it and should edit it sparingly to keep it concise. Codex agents must not change this file unless explicitly requested. In working repos, repo-specific conventions live in `REPO_WAY_OF_WORKING.md` and branch-specific expectations live in the active spec folder (`WAY_OF_WORKING.md`).
 
 ## Spec files
-- `SPEC_CONTEXT.md` — canonical list of spec file paths.
 - `SPEC.md` — requirements + acceptance (source of truth with code).
 - `TECHNICAL_NOTES.md` — entry points, modules, paths, validation tips.
 - `SPEC_PROGRESS.md` — high-level done vs remaining.
@@ -14,9 +13,13 @@ This guide stays repo-agnostic; edit sparingly to keep it concise. Repo-specific
 - `USER_GUIDE.md` — user-facing value/usage/limits.
 - `scripts/` — helper scripts (each must include a README entry).
 
+## Ownership and edit rules
+- Human-maintained (Codex edits only on explicit request): this repo’s `AGENTS.md` and root `README.md`; in working repos, also `REPO_WAY_OF_WORKING.md` and any shared helper scripts at the repo root.
+- Agent-safe by default in working repos: branch/user-specific spec files (`SPEC.md`, `TECHNICAL_NOTES.md`, `SPEC_PROGRESS.md`, `TODO.md`, `JOURNAL.md`, `FOR_HUMAN.md`, `WAY_OF_WORKING.md`, `USER_GUIDE.md`) and code/config under the active repo.
+
 ## Flow
-1. **Stuck gate** — if `$SPEC_DIR/STUCK.md` exists, stop and summarize the block in `FOR_HUMAN.md`.
-2. **Load context** — run `specs/tools/gen-spec-context.sh` to refresh `SPEC_CONTEXT.md`, then read it so you have the exact file paths.
+1. **Stuck gate** — if `STUCK.md` exists next to your spec files, stop and summarize the block in `FOR_HUMAN.md`.
+2. **Load context** — read `SPEC.md`, `TECHNICAL_NOTES.md`, `SPEC_PROGRESS.md`, `TODO.md`, and `JOURNAL.md` in the target repo to understand the current slice.
 3. **Align docs** — compare each spec document with `SPEC.md` and the current code; update any stale information and log unanswered decisions in `FOR_HUMAN.md`.
 4. **Plan** — capture the next thin, reversible slice (with acceptance) in `TODO.md`, referencing `TECHNICAL_NOTES.md` for entry points.
 5. **Journal (pre)** — ensure the tree is clean; append intent/guardrails/plan to `JOURNAL.md`.
