@@ -2,6 +2,7 @@
 
 This template is filled by the helper script. Keep the placeholders as-is.
 
+<!-- @spec-context:start -->
 ## Paths recorded in `SPEC_CONTEXT.md`
 - **SPEC_DIR**: {{SPEC_DIR}}
 - **SPEC**: {{SPEC}}

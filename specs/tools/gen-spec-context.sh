@@ -47,5 +47,12 @@ for entry in "${VALUES[@]}"; do
   content="${content//$key/$val}"
 done
 
+CUTOFF_MARKER="<!-- @spec-context:start -->"
+
+if printf '%s\n' "$content" | grep -qF "$CUTOFF_MARKER"; then
+  # Drop any template-only preamble so the generated file starts after the cutoff marker.
+  content="$(printf '%s\n' "$content" | awk -v m="$CUTOFF_MARKER" 'BEGIN{keep=0} $0==m{keep=1; next} keep')"
+fi
+
 echo "$content" > "$OUTPUT"
 echo "Wrote $OUTPUT using $SPEC_DIR"

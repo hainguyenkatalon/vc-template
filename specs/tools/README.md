@@ -9,7 +9,7 @@ Conventions
 
 Included Helpers
 - `spec-bootstrap.sh` — scaffold `specs/<branch>/` files according to AGENTS.md (creates empty files; no default content).
-- `gen-spec-context.sh` — fill `SPEC_CONTEXT.md` from `SPEC_CONTEXT.md.template`, auto-detecting the branch (override with `SPEC_DIR_OVERRIDE`).
+- `gen-spec-context.sh` — fill `SPEC_CONTEXT.md` from `SPEC_CONTEXT.md.template`, auto-detecting the branch (override with `SPEC_DIR_OVERRIDE`); template preamble text above the `<!-- @spec-context:start -->` marker is stripped so the generated file starts at the recorded paths section.
 - `codex_tools.py` — launch Codex CLI with sensible defaults; write logs/structured output under `specs/<branch>/logs/`.
 
 Command Patterns
