@@ -1,6 +1,10 @@
 # AGENTS.md — Shared Way of Working
 
-This guide stays repo-agnostic; humans own it and should edit it sparingly to keep it concise. Codex agents must not change this file unless explicitly requested.
+This guide stays repo-agnostic; humans own it and should edit it sparingly to keep it concise. Codex must not change this file unless explicitly requested.
+
+This repo is the place where Codex keeps track of its work. Repos in `REPOS.md` is the actually place that Codex works on.
+
+All files in this guide is relative to this repo.
 
 ## Spec files
 - `REPOS.md` — human-maintained list of codebases (relative paths) where the agent is allowed to work.
