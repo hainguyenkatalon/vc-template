@@ -60,7 +60,21 @@ fi
 mkdir -p "$TARGET_PATH"
 cp -a "$TEMPLATE_DIR/." "$TARGET_PATH/"
 
+read -rp "Enter path to add to REPOS.md (relative to this template): " REPO_ENTRY
+if [[ -n "${REPO_ENTRY// }" ]]; then
+  {
+    echo
+    echo "- $REPO_ENTRY"
+  } >> "$TARGET_PATH/REPOS.md"
+  echo "Added '$REPO_ENTRY' to $TARGET_PATH/REPOS.md"
+else
+  echo "No REPOS.md entry provided; skipping update."
+fi
+
 cat <<MSG
 Template copied to $TARGET_PATH
-You can now initialize a new git repo there (e.g., 'cd "$TARGET_PATH" && git init').
+Next steps:
+  1. Open $TARGET_PATH/REPOS.md to verify the repo list.
+  2. Fill out $TARGET_PATH/SPEC.md with the requirements for this slice.
+  3. Initialize git if needed (e.g., 'cd "$TARGET_PATH" && git init').
 MSG
